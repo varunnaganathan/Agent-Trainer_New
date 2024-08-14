@@ -1,4 +1,5 @@
-
+from dotenv import load_dotenv
+from groq import Groq
 import io
 import wave
 import pyaudio
@@ -7,6 +8,7 @@ from openai import OpenAI
 import speech_recognition as sr
 from prompts.agent_response import AUDIO_HANDLING_PROMPT
 from settings import OPENAI_API_KEY
+from settings import api_key_map, tp_model_map, stt_model_map
 
 
 def byte_stream_generator(response, buffer_size=256):
@@ -25,26 +27,34 @@ def byte_stream_generator(response, buffer_size=256):
         print(f"Error while streaming bytes: {e}")
 
 
-
 class SpeechBot:
     def __init__(
             self, 
             audio_handling_prompt,
-            tp_model_name='gpt-4',
-            stt_model_name='whisper-1',
+            client_type='groq',
             tts_model_name='tts-1',
             tts_voice='alloy',
             pause_threshold=2
         ):
         self.recognizer = sr.Recognizer()
         self.pause_threshold = pause_threshold
-        self.client = OpenAI(
+
+        if client_type == 'openai':
+            self.client = OpenAI(
+                api_key=OPENAI_API_KEY,
+            )
+        else:
+            self.client = Groq(
+                api_key=api_key_map[client_type]
+            )
+        
+        self.openai_client = OpenAI(
             api_key=OPENAI_API_KEY,
         )
 
         self.audio_handling_prompt = audio_handling_prompt
-        self.stt_model_name = stt_model_name
-        self.tp_model_name = tp_model_name
+        self.stt_model_name = stt_model_map[client_type]
+        self.tp_model_name = tp_model_map[client_type]
         self.tts_model_name = tts_model_name
         self.tts_voice = tts_voice
 
@@ -65,7 +75,7 @@ class SpeechBot:
             
             # Listen continuously until the user stops speaking
             audio = self.recognizer.listen(source)
-            audio_file_path = 'data/audio.wav'
+            audio_file_path = f'data/audio_{len(self.messages)}.wav'
             with open(audio_file_path, 'wb') as f:
                 f.write(audio.get_wav_data())
 
@@ -85,7 +95,7 @@ class SpeechBot:
                 "content": text
             })
 
-            os.remove(audio_file_path)
+            # os.remove(audio_file_path)
             
             print(f"You said: {text}")
             return text
@@ -126,8 +136,7 @@ class SpeechBot:
     
     
     def speak(self, text):
-        speech_file_path = 'data/speech.mp3'
-        with self.client.audio.speech.with_streaming_response.create(
+        with self.openai_client.audio.speech.with_streaming_response.create(
             model="tts-1-hd",
             voice="nova",
             input=text,
@@ -186,11 +195,12 @@ class SpeechBot:
             
             self.speak(bot_text_response)
             # break
-            inp = input("\nPress Enter to continue, q/quit/stop to quit...\n")
-            if inp in ['q', 'quit', 'stop']:
-                break
+            # inp = input("\nPress Enter to continue, q/quit/stop to quit...\n")
+            # if inp in ['q', 'quit', 'stop']:
+            #     break
 
 
 if __name__ == "__main__":
+    load_dotenv()
     bot = SpeechBot(AUDIO_HANDLING_PROMPT)
     bot.run()
