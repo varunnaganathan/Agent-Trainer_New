@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from groq import Groq
 import io
+import sounddevice
 import wave
 import pyaudio
 import os
