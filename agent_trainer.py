@@ -1,12 +1,13 @@
 from dotenv import load_dotenv
 from groq import Groq
 import io
+import sounddevice
 import wave
 import pyaudio
 import os
 from openai import OpenAI
 import speech_recognition as sr
-from prompts.agent_response import AUDIO_HANDLING_PROMPT
+from prompts.agent_response import AUDIO_HANDLING_PROMPT, AUDIO_HANDLING_PROMPT_2
 from settings import OPENAI_API_KEY
 from settings import api_key_map, tp_model_map, stt_model_map
 
@@ -202,5 +203,5 @@ class SpeechBot:
 
 if __name__ == "__main__":
     load_dotenv()
-    bot = SpeechBot(AUDIO_HANDLING_PROMPT)
+    bot = SpeechBot(AUDIO_HANDLING_PROMPT_2)
     bot.run()
