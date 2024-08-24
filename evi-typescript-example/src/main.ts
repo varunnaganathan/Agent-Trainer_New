@@ -10,7 +10,6 @@ import {
 } from 'hume';
 import './styles.css';
 import OpenAI from "openai";
-import ClientOptions from "openai";
 
 
 (async () => {
@@ -65,7 +64,7 @@ import ClientOptions from "openai";
    * The ChatGroup ID used to resume the chat if disconnected unexpectedly
    */
   let chatGroupId: string | undefined;
-
+  let chatId: string | undefined;
   /**
    * audio playback queue
    */
@@ -120,7 +119,7 @@ import ClientOptions from "openai";
   /**
    * stops audio capture and playback, and closes the Web Socket connection
    */
-  function disconnect(): void {
+  async function disconnect(): Promise<void> {
     // update ui state
     toggleBtnStates();
 
@@ -142,6 +141,38 @@ import ClientOptions from "openai";
 
     // closed the Web Socket connection
     socket?.close();
+
+    // now call the flask server
+    // send POST request to Flask server
+    const params = new URLSearchParams({
+      chatId: chatId?chatId:"null",
+      // add any additional parameters here
+    });
+  
+    // send POST request to Flask server
+    try {
+      const response = await fetch(`http://localhost:8080/analyze?${params.toString()}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          // body content here if needed
+        }),
+      });
+  
+    if (!response.ok) {
+      throw new Error('Failed to send disconnect message to server');
+    }
+
+    const responseData = await response.json();
+    console.log('Server response after chat completion:', responseData);
+  } catch (error) {
+    console.error('Error sending disconnect message to server:', error);
+  }
+
+
+
   }
 
   /**
@@ -264,6 +295,7 @@ import ClientOptions from "openai";
       // save chat_group_id to resume chat if disconnected
       case 'chat_metadata':
         chatGroupId = message.chatGroupId;
+        chatId = message.chatId;
         break;
 
       // append user and assistant messages to UI for chat visibility
