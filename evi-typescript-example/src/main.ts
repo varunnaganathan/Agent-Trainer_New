@@ -485,7 +485,7 @@ async function fetchSuggestions(): Promise<string[]> {
 
 
   const openai = new OpenAI({
-    apiKey:"", dangerouslyAllowBrowser:true,
+     dangerouslyAllowBrowser:true,
   });
   
     const response = await openai.chat.completions.create({
