@@ -8,8 +8,64 @@ import {
   getBrowserSupportedMimeType,
   MimeType,
 } from 'hume';
+
 import './styles.css';
 import OpenAI from "openai";
+
+
+
+// code for realtime ui
+
+
+// Example: Updating the suggestions tab with new data
+function updateSuggestionsTab(emotion: string, talkingPoints: string[], emotionalCues: string[]) {
+  // Update the emotional state
+  const currentEmotionElement = document.getElementById('currentEmotion');
+  if (currentEmotionElement) {
+    currentEmotionElement.textContent = emotion;
+  }
+
+  // Update the talking points
+  const talkingPointsListElement = document.getElementById('talkingPointsList');
+  if (talkingPointsListElement) {
+    talkingPointsListElement.innerHTML = ''; // Clear existing points
+    talkingPoints.forEach(point => {
+      const listItem = document.createElement('li');
+      listItem.textContent = point;
+      talkingPointsListElement.appendChild(listItem);
+    });
+  }
+
+  // Update the emotional cues
+  const emotionalCuesListElement = document.getElementById('emotionalCuesList');
+  if (emotionalCuesListElement) {
+    emotionalCuesListElement.innerHTML = ''; // Clear existing cues
+    emotionalCues.forEach(cue => {
+      const listItem = document.createElement('li');
+      listItem.textContent = cue;
+      emotionalCuesListElement.appendChild(listItem);
+    });
+  }
+}
+
+// Example of how to use this function
+
+
+
+
+
+
+
+// till here
+
+
+
+
+
+
+
+
+
 
 
 (async () => {
@@ -65,6 +121,112 @@ import OpenAI from "openai";
    */
   let chatGroupId: string | undefined;
   let chatId: string | undefined;
+
+
+
+
+  // report code
+
+  interface ReportSection {
+    title: string;
+    content: string;
+  }
+  
+  interface ReportData {
+    sections: ReportSection[];
+  }
+  
+  // Function to fetch report data
+  const fetchReportData = async (reportId: string): Promise<ReportData> => {
+    try {
+      const response = await fetch(`/api/reports/${reportId}`);
+      if (!response.ok) throw new Error('Failed to fetch report data');
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching report data:', error);
+      throw error;
+    }
+  };
+
+
+  // create dummy report data
+  // Dummy data for testing
+const dummyReportData: ReportData = {
+  sections: [
+    { title: 'Introduction', content: 'This is the introduction section of the report.' },
+    { title: 'Summary', content: 'This section provides a summary of the findings.' },
+    { title: 'Details', content: 'Here are the detailed observations and analysis.' },
+    { title: 'Conclusion', content: 'This section includes the final conclusions and recommendations.' },
+    { title: 'Appendices', content: 'Additional data and information can be found in the appendices.' },
+  ],
+};
+
+
+
+  
+  // Function to render the report
+  const renderReport = (data: ReportData): void => {
+    const container = document.getElementById('report-content');
+    if (!container) return;
+  
+    container.innerHTML = ''; // Clear existing content
+  
+    data.sections.forEach((section) => {
+      const sectionElement = document.createElement('div');
+      sectionElement.className = 'report-section';
+      sectionElement.innerHTML = `
+        <h2>${section.title}</h2>
+        <p>${section.content}</p>
+      `;
+      container.appendChild(sectionElement);
+    });
+  };
+
+  
+
+
+  // Function to handle report closing
+const closeReportButton = document.getElementById('close-report-btn');
+if (closeReportButton) {
+  closeReportButton.addEventListener('click', () => {
+    const reportContainer = document.getElementById('report-container');
+    if (reportContainer) {
+      reportContainer.style.display = 'none'; // Hide the report
+    }
+  });
+}
+  // till here
+
+
+
+
+
+  //
+  // Call the function
+  const callLocalhost = async () => {
+    try {
+        const res = await fetch('http://localhost:8080/analyze?chatId="ddd"', {
+            method: 'GET', // or 'GET' if you're making a GET request
+            headers: {
+                'Content-Type': 'application/json',
+            },
+          
+        });
+        console.log('Result:',res)
+        const result = await res.json();
+        console.log('Result:', result);
+    } catch (error) {
+        console.error('Error during API call:', error);
+    }
+};
+await callLocalhost();
+
+
+
+
+
+
+  //
   /**
    * audio playback queue
    */
@@ -142,38 +304,69 @@ import OpenAI from "openai";
     // closed the Web Socket connection
     socket?.close();
 
-    // now call the flask server
-    // send POST request to Flask server
-    const params = new URLSearchParams({
-      chatId: chatId?chatId:"null",
-      // add any additional parameters here
-    });
-  
-    // send POST request to Flask server
-    try {
-      const response = await fetch(`http://localhost:8080/analyze?${params.toString()}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          // body content here if needed
-        }),
-      });
-  
-    if (!response.ok) {
-      throw new Error('Failed to send disconnect message to server');
+    // code for report data -------------------------------------------------------------------------------------
+
+
+    const reportId = '123'; // Replace with actual report ID or logic to determine ID
+  try {
+    //const reportData = await fetchReportData(reportId);
+    //renderReport(reportData);
+    renderReport(dummyReportData);
+    
+    const reportContainer = document.getElementById('report-container');
+    if (reportContainer) {
+      reportContainer.style.display = 'block'; // Show the report
     }
-
-    const responseData = await response.json();
-    console.log('Server response after chat completion:', responseData);
   } catch (error) {
-    console.error('Error sending disconnect message to server:', error);
+    console.error('Error handling stop call:', error);
   }
 
 
 
+
+
+
+
+
   }
+
+
+
+  async function getDataWithParams(chatId:string) {
+    // Define your base URL and parameters
+    const baseUrl = 'http://localhost:8080/analyze';
+    const params = new URLSearchParams({
+        
+        chatId: chatId,
+    }).toString();
+
+    // Construct the full URL with query parameters
+    const url = `${baseUrl}?${params}`;
+    
+    try {
+        // Send GET request
+        const response = await fetch(url, {
+            method: 'GET', // Method is GET by default, but it's good practice to include it
+            
+        });
+
+        // Check if response is ok
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        // Parse JSON response
+        const data = await response.json();
+
+        // Handle the data
+        console.log('Response data:', data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+
+
 
   /**
    * captures and records audio stream, and sends audio stream through the socket
@@ -314,6 +507,8 @@ import OpenAI from "openai";
         
         const suggestions = await fetchSuggestions();
         updateSuggestionsList(suggestions);
+        updateSuggestionsTab('Happy', [message.message.content?message.message.content:""], ['Show enthusiasm', 'Offer a compliment']);
+
         
         
         break;
@@ -512,10 +707,28 @@ class ChatCard {
 // newly added funcs
 
 async function fetchSuggestions(): Promise<string[]> {
+    
+
   try {
+      const res = await fetch('http://localhost:8080/guidance?emotion=Calmness"', {
+          method: 'GET', // or 'GET' if you're making a GET request
+          headers: {
+              'Content-Type': 'application/json',
+          },
+        
+      });
+      console.log('Result:',res)
+      const result = await res.json();
+      console.log('Result:', result);
+      return [res.toString()];
+  } catch (error) {
+      console.error('Error during API call:', error);
+  }
+  return ["failed request suggestion"]
+  
 
 
-
+  /*
   const openai = new OpenAI({
      dangerouslyAllowBrowser:true,
   });
@@ -530,7 +743,7 @@ async function fetchSuggestions(): Promise<string[]> {
   
     console.log(response.choices[0]);
   
-
+  */
 
 
     /*
@@ -543,17 +756,8 @@ async function fetchSuggestions(): Promise<string[]> {
     */
    
 
-    if (!response) {
-      throw new Error('Failed to fetch suggestions');
-    }
-
-    const suggestions = await response.choices[0].message?.content;
-    return [suggestions?suggestions:""]; // Assuming the API returns an array of strings
-  } catch (error) {
-    console.error('Error fetching suggestions:', error);
-    return ["default string"];
-  }
 }
+
 
 function updateSuggestionsList(suggestions: string[]): void {
   const suggestionsList = document.querySelector<HTMLUListElement>('#suggestions-list');

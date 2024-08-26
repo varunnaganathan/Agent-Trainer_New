@@ -3,28 +3,111 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Empathic Voice Interface</title>
+    <title>Echo - Live Sales Coach</title>
   </head>
   <body>
     <div id="app">
+      
+      <div id="heading-container">
+        <h2>Echo - Your live sales coach</h2>
+      </div>
+      
+
+    <div class="containerChat">
+      <div id="chat"></div>
+
+
+
+      <!-- for persona details-->
+      <div class="persona-details">
+        <img src="https://upload.wikimedia.org/wikipedia/en/d/dc/MichaelScott.png" alt="Persona Image" class="persona-image">
+        <p class="persona-description">Michael Scott</p>
+        <p>Company - Dunder mifflin. Paper Company in Scranton, Pennsylvania</p>
+        
+        <div class="persona-options">
+          <div class="option-group">
+            <label>Stakeholder</label>
+            <select>
+              <option selected="true">CEO</option>
+              <option>VP Sales</option>
+              <option>Hiring Lead</option>
+            </select>
+          </div>
+    
+          <div class="option-group">
+            <label>Personality</label>
+            <select>
+              <option>Curious</option>
+              <option selected="true">Rude</option>
+              <option>Champion</option>
+            </select>
+          </div>
+    
+          <div class="option-group">
+            <label>Type of Call</label>
+            <select>
+              <option selected="true">Cold</option>
+              <option>Discovery</option>
+              <option>Demo</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <!-- new realtime coaching tab not needed for now-->
+      <!--
+      <div id="suggestionsTabContent" class="p-4 bg-white rounded-lg shadow">
+        <div id="emotionalState" class="mb-4">
+          <h3 class="text-lg font-bold text-gray-700">Customer's Emotional State</h3>
+          <p id="currentEmotion" class="text-gray-600">Neutral</p>
+        </div>
+      
+        <div id="talkingPoints" class="mb-4">
+          <h3 class="text-lg font-bold text-gray-700">Talking Points</h3>
+          <ul id="talkingPointsList" class="list-disc list-inside text-gray-600">
+            <li>Example Talking Point 1</li>
+            <li>Example Talking Point 2</li>
+          </ul>
+        </div>
+      
+        <div id="emotionalCues" class="mb-4">
+          <h3 class="text-lg font-bold text-gray-700">Emotional Cues to Change Pitches</h3>
+          <ul id="emotionalCuesList" class="list-disc list-inside text-gray-600">
+            <li>Example Emotional Cue 1</li>
+            <li>Example Emotional Cue 2</li>
+          </ul>
+        </div>
+      -->
+      </div>
+
+      
+    </div>
+    
+
+
+
+
       <div id="btn-container">
         <button id="start-btn">Start</button>
         <button id="stop-btn" disabled="true">Stop</button>
       </div>
-      <div id="heading-container">
-        <h2>Empathic Voice Interface (EVI)</h2>
-        <p>
-          Welcome to our TypeScript sample implementation of the Empathic Voice Interface!
-          Click the "Start" button and begin talking to interact with EVI.
-        </p>
-      </div>
-      <div id="chat"></div>
     </div>
     
+    <div id="report-container" class="report-container" style="display: none;">
+      <h1>Call Report</h1>
+      <div id="report-content">
+        <!-- Report sections will be injected here -->
+      </div>
+      <button id="close-report-btn">Close Report</button>
+    </div>
+
     <div id="suggestions-tab" class="tab">
-      <h3>Suggestions</h3>
+      <h3>Real Time Coaching</h3>
       <ul id="suggestions-list"></ul>
     </div>
+
+      
+    
+
 
     <script type="module" src="/src/main.ts"></script>
   </body>
