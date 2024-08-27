@@ -138,15 +138,46 @@ function updateSuggestionsTab(emotion: string, talkingPoints: string[], emotiona
   
   // Function to fetch report data
   const fetchReportData = async (reportId: string): Promise<ReportData> => {
+
+    /*
     try {
-      const response = await fetch(`/api/reports/${reportId}`);
-      if (!response.ok) throw new Error('Failed to fetch report data');
-      return response.json();
-    } catch (error) {
-      console.error('Error fetching report data:', error);
-      throw error;
-    }
-  };
+      const res = await fetch('http://localhost:8080/analyzechat?chatId=bd75891c-6df8-43f1-9e4d-1dcc2c3fad3f', {
+          method: 'GET', // or 'GET' if you're making a GET request
+          headers: {
+              'Content-Type': 'application/json',
+          },
+        
+      });
+      console.log('Result:',res)
+      const result = await res.json();
+      console.log('Result:', result);
+      return res;
+  } catch (error) {
+      console.error('Error during API call:', error);
+  }
+  return "failed request suggestion"
+  */
+
+  
+    try {
+      const res = await fetch('http://localhost:8080/analyzechat?chatId=bd75891c-6df8-43f1-9e4d-1dcc2c3fad3f', {
+          method: 'GET', // or 'GET' if you're making a GET request
+          headers: {
+              'Content-Type': 'application/json',
+          },
+        
+      });
+      console.log('Result for analyze chat:',res)
+      const result = await res.json();
+      console.log('Result:', result);
+  } catch (error) {
+      console.error('Error during API call for analyze chat:', error);
+  }
+
+  
+};
+
+
 
 
   // create dummy report data
@@ -163,6 +194,111 @@ const dummyReportData: ReportData = {
 
 
 
+
+function formatText(text: string): string {
+  // Basic formatting for text (e.g., line breaks, bold, italics)
+  return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+      .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italics
+      .replace(/\n/g, '<br>'); // Line breaks
+}
+
+async function renderReportFromUrl(url: string): Promise<void> {
+  try {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Ensure the data is an object (dictionary)
+      if (typeof data === 'object' && data !== null) {
+          // Separate key-value pairs
+          const keyValuePairs: { [key: string]: string } = {};
+
+
+          // add to html element
+          const container = document.getElementById('report-content');
+          if (!container) return;
+          container.innerHTML = ''; // Clear existing content
+
+
+
+          // add image here first
+
+          const sectionWrapper = document.createElement('div');
+              sectionWrapper.className = 'report-section-wrapper';
+
+              // Create section header
+              const sectionHeader = document.createElement('div');
+              sectionHeader.className = 'report-section-header';
+              sectionHeader.innerHTML = `<h2>Call Analysis</h2>`;
+
+              // Create section content
+              const sectionContent = document.createElement('div');
+              sectionContent.className = 'report-section-content';
+              sectionContent.innerHTML = '<image src = "images/Call_analysis.png"/>';
+
+              // Append header and content to wrapper
+              sectionWrapper.appendChild(sectionHeader);
+              sectionWrapper.appendChild(sectionContent);
+
+              // Append section wrapper to container
+              container.appendChild(sectionWrapper);
+
+
+
+          Object.keys(data).forEach(key => {
+              keyValuePairs[key] = String(data[key]);
+
+              
+              const sectionWrapper = document.createElement('div');
+              sectionWrapper.className = 'report-section-wrapper';
+
+              // Create section header
+              const sectionHeader = document.createElement('div');
+              sectionHeader.className = 'report-section-header';
+              sectionHeader.innerHTML = `<h2>${key}</h2>`;
+
+              // Create section content
+              const sectionContent = document.createElement('div');
+              sectionContent.className = 'report-section-content';
+              sectionContent.innerHTML = formatText(keyValuePairs[key]);
+
+              // Append header and content to wrapper
+              sectionWrapper.appendChild(sectionHeader);
+              sectionWrapper.appendChild(sectionContent);
+
+              // Append section wrapper to container
+              container.appendChild(sectionWrapper);
+            
+              
+              
+              /*
+              const sectionElement = document.createElement('div');
+              sectionElement.className = 'report-section';
+              sectionElement.innerHTML = `
+                <h2>${key}</h2>
+                <p>${keyValuePairs[key]}</p>
+              `;
+              container.appendChild(sectionElement);
+
+              */
+
+          });
+
+
+          console.log(keyValuePairs); // Log or use the key-value pairs
+      } else {
+          throw new Error('Response is not a valid JSON object');
+      }
+  } catch (error) {
+      console.error("Error:", error);
+  }
+};
   
   // Function to render the report
   const renderReport = (data: ReportData): void => {
@@ -172,6 +308,9 @@ const dummyReportData: ReportData = {
     container.innerHTML = ''; // Clear existing content
   
     data.sections.forEach((section) => {
+
+
+
       const sectionElement = document.createElement('div');
       sectionElement.className = 'report-section';
       sectionElement.innerHTML = `
@@ -179,6 +318,8 @@ const dummyReportData: ReportData = {
         <p>${section.content}</p>
       `;
       container.appendChild(sectionElement);
+
+      
     });
   };
 
@@ -305,12 +446,25 @@ await callLocalhost();
     socket?.close();
 
     // code for report data -------------------------------------------------------------------------------------
+    try {
+      await renderReportFromUrl("http://localhost:8080/analyzechat?chatId=bd75891c-6df8-43f1-9e4d-1dcc2c3fad3f");
+      const reportContainer = document.getElementById('report-container');
+      if (reportContainer) {
+      reportContainer.style.display = 'block'; // Show the report
+      }
+    }
+    catch (error) {
+      console.error('Error handling stop call:', error);
+    }
 
 
-    const reportId = '123'; // Replace with actual report ID or logic to determine ID
+    /*
+
+  const reportId = '123'; // Replace with actual report ID or logic to determine ID
   try {
-    //const reportData = await fetchReportData(reportId);
-    //renderReport(reportData);
+    //const reportdata = await fetchReportData("bd75891c-6df8-43f1-9e4d-1dcc2c3fad3f");
+    //console.log(reportdata.sections);
+    //renderReport(reportdata);
     renderReport(dummyReportData);
     
     const reportContainer = document.getElementById('report-container');
@@ -320,13 +474,10 @@ await callLocalhost();
   } catch (error) {
     console.error('Error handling stop call:', error);
   }
+  */
 
 
-
-
-
-
-
+  // till hereee
 
   }
 

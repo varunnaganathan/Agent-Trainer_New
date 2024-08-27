@@ -210,10 +210,62 @@ button:disabled {
 
 
 
+/* Container for the entire report */
+#report-content {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Wrapper for each section */
+.report-section-wrapper {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  border-left: 5px solid #4a90e2; /* Accent color for sections */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Header for each section */
+.report-section-header {
+  margin-bottom: 10px;
+  border-bottom: 2px solid #4a90e2;
+  padding-bottom: 5px;
+}
+
+.report-section-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Content of each section */
+.report-section-content {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #555;
+}
+
+/* Optional: Add custom styles for formatted text */
+.report-section-content strong {
+  font-weight: bold;
+  color: #000;
+}
+
+.report-section-content em {
+  font-style: italic;
+  color: #666;
+}
+
+.report-section-content br {
+  margin-bottom: 10px;
+}
 
 
-
-
+/*
 .report-container {
   max-width: 800px;
   margin: 0 auto;
@@ -242,6 +294,9 @@ button:disabled {
   font-size: 1em;
   line-height: 1.5;
 }
+
+
+*/
 
 #close-report-btn {
   display: block;

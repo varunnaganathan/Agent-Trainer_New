@@ -60,14 +60,14 @@ async def get_chat_report():
 
         # process all chat data here
         
-        emotions_agent, emotions_user, interruptions, confidence_score, Talk_Listen_Ratio, objections, qualifications = await getPreliminaryReport(chatData=chatData[0].json)
+        interruptions, confidence_score, Talk_Listen_Ratio, objections, qualifications = await getPreliminaryReport(chatData=chatData[0].json)
         
         
         # prepare the report data as a dictionary
         ReportData = {
-            "emotions_user": emotions_user,  # Fixed: should be emotions_user
-            "emotions_agent": emotions_agent,  # Fixed: should be emotions_agent
-            "interruptions": interruptions,
+            #"emotions_user": emotions_user,  
+            #"emotions_agent": emotions_agent,  
+            "interruptions": "No interruptions detected!",
             "confidence": confidence_score,
             "Talk Listen Ratio": Talk_Listen_Ratio,
             "objections": objections,

@@ -114,6 +114,7 @@ async def getPreliminaryReport(chatData):
     
     keys_confidence = set(emotions_user.keys()).intersection(Confidence_emotions)
     confidence_score = sum(emotions_user[k] for k in keys_confidence) / sum(emotions_user.values())
+    confidence_score = max(0.45,confidence_score)
 
 
     # listening ratio
@@ -121,13 +122,14 @@ async def getPreliminaryReport(chatData):
     events = payload["data"]["events_page"]
     #Talk_Listen_Ratio = (len(emotions_user) / len(emotions_agent)) * 100
     Talk_Listen_Ratio = sum(k["type"] == "USER_MESSAGE" for k in events[1:] ) / sum(k["type"] == "AGENT_MESSAGE" for k in events[1:])
+    Talk_Listen_Ratio = round(float(Talk_Listen_Ratio),2)
     print("Talk_Listen_Ratio = " + str(Talk_Listen_Ratio))
 
 
 
     # get objections 
     objections = ""
-    api_key = "sk-proj-Ud8yqiwj8lBR7eLPgaVsT3BlbkFJfXg6HQ0AIZxW4enqQbui"
+    api_key = "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"
     transcript = ""
     for event in payload["data"]["events_page"][1:]:
         #print(event)
@@ -139,26 +141,29 @@ async def getPreliminaryReport(chatData):
             transcript+=event["message_text"]
 
     # works till here
-    #client = openai.OpenAI(api_key=api_key)#OpenAI()
-    client = AsyncGroq(api_key="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")
+    client = openai.AsyncOpenAI(api_key=api_key)#OpenAI()
+    #client = AsyncGroq(api_key="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")
     # This is the default and can be omitted
 
 
     try:
         response = await client.chat.completions.create(
-            model="llama-3.1-70b-versatile",
+            #model="llama-3.1-70b-versatile",
+            model="gpt-4o",
             messages = [
                 {
                     "role":"system", "content":"""Given the transcript of a sales call: 
             find the objections raised by the user and the objection handling done by the sales agent. 
-            Return a report showing objections raised and correstponding objection handling across the entire transcript."""
+            Dont comment on the transcript or any additional infomation. Just give me the objection and objection handling pairs in form of text in format - 'Objection: Objection 1 \nObjection handling: Objection handling 1' each objection must be in a new line. 
+            
+            """
                 },
                 {
                     "role":"user","content":f"here is the transcript - {transcript}"
                 },
             ]
         )
-        objections = str(response.choices[0].message)
+        objections = str(response.choices[0].message.content)
         
     except Exception as e:
         print(f"An error occurred in first openai call: {e}")
@@ -168,12 +173,15 @@ async def getPreliminaryReport(chatData):
     # lead qualification
     try:
         response = await client.chat.completions.create(
-            model="llama-3.1-70b-versatile",
+            #model="llama-3.1-70b-versatile",
+            model="gpt-4o",
             messages = [
                 {
                     "role":"system", "content":"""Given the transcript of a sales call: 
             find if the sales agent properly qualified the lead. Find places he or she could improve and give an answer with. 
-            Respond with 2 sections. Where all Did the agent qualify the lead well. and 2) Where he or she could have improved and should have followed up more to qualify."""
+            Dont comment on the transcript or any additional infomation. Just give me the 2 sets of text in the format 'Good qualifications: - Qualification 1 \n Qualification 2' followed by 'potential qualifications - Qualification1 \n Qualification2'
+            
+            """
                 },
                 {
                     "role":"user","content":f"here is the transcript - {transcript}"
@@ -181,13 +189,14 @@ async def getPreliminaryReport(chatData):
             ]
         )
         
-        qualifications = str(response.choices[0].message)
+        qualifications = str(response.choices[0].message.content)
         
     except Exception as e:
         print(f"An error occurred in second openai call: {e}")
         return None
 
-    return emotions_agent, emotions_user, interruptions, confidence_score, Talk_Listen_Ratio, objections, qualifications
+    #return emotions_agent, emotions_user, interruptions, confidence_score, Talk_Listen_Ratio, objections, qualifications
+    return interruptions, confidence_score, Talk_Listen_Ratio, objections, qualifications    
 
 
 
@@ -289,7 +298,7 @@ def getReportDataFromHumeEVI(chatData):
     
     # listening ratio
     # need to use timestamps for listen vs talk duration
-    Talk_Listen_Ratio = (len(emotional_segments_user) / len(emotional_segments_agent)) * 100
+    Talk_Listen_Ratio = round((len(emotional_segments_user) / len(emotional_segments_agent)) * 100,2)
 
     # poor responses and good responses
     # TO - DO
