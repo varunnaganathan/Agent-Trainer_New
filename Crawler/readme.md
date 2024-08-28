@@ -20,6 +20,15 @@
 # use basic foundational for soft skills
 # use emotional AI if needed 
 
+
+Sample flow
+
+
+
+use tavily manually - https://app.tavily.com/chat withi this query - (what are the top pain points for Deel - the company right now)
+give this to gpt and get objections and qualifications - https://chatgpt.com/c/9f57037c-b75e-4551-9d5c-ff83d7891e42
+
+
 ######## Post MVP #########
 
 
